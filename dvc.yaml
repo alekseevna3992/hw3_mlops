@@ -15,12 +15,16 @@ stages:
       # Без этого dvc не заметит, что источник изменился, и не пересчитает стадию.
       - src/collect.py
       - src/config.py
+
+    params:
+      - collect
     outs:
       - data/raw.jsonl
 
   clean:
     cmd: python -m src.clean
     deps:
+      - data/raw.jsonl
       - src/clean.py
       - src/dedup.py
       - src/pii.py
@@ -29,12 +33,10 @@ stages:
       - src/config.py
     params:
       - clean
+      - paths.raw
       - paths.clean
     outs:
       - data/clean.jsonl
-    metrics:
-      - metrics/clean.json:
-          cache: false
 
   diversity:
     cmd: python -m src.diversity
@@ -71,6 +73,8 @@ stages:
       - paths.test
     outs:
       - data/train.jsonl
+      - data/val.jsonl
+      - data/test.jsonl
     metrics:
       - metrics/split.json:
           cache: false

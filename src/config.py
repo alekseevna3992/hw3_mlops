@@ -1,4 +1,4 @@
-"""Чтение params.yaml — единственная точка правды о конфигурации."""
+"""Чтение params.yaml - единственная точка правды о конфигурации."""
 
 from pathlib import Path
 
@@ -34,7 +34,7 @@ def source_files(params: dict) -> list[Path]:
             + "\n  ".join(str(f) for f in missing)
             + "\n\nТак и должно быть, если вы ещё не подключили СВОЙ датасет.\n"
               "Что сделать: переписать src/collect.py под свой источник и\n"
-              "указать пути в params.yaml → collect.sources. Остальные стадии\n"
+              "указать пути в params.yaml -> collect.sources. Остальные стадии\n"
               "работают с контрактом raw.jsonl и правок не требуют."
         )
     return files

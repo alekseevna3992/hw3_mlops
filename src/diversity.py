@@ -2,12 +2,12 @@
 
 Зачем отдельная стадия. Набор из тридцати строк, сгенерированных по одному
 шаблону, проходит и валидацию схемы, и дедупликацию, и проверку контаминации:
-формально он безупречен. Обучение на нём сходится быстрее обычного — и модель
+формально он безупречен. Обучение на нём сходится быстрее обычного - и модель
 выучивает шаблон вместо задачи. Ни одна из предыдущих стадий этого не ловит,
-потому что каждая смотрит на строки по отдельности, а вырожденность — свойство
+потому что каждая смотрит на строки по отдельности, а вырожденность - свойство
 набора целиком.
 
-Гейт, а не отчёт: нарушен порог — стадия падает и печатает, какой именно и
+Гейт, а не отчёт: нарушен порог - стадия падает и печатает, какой именно и
 насколько. Пороги живут в params.yaml и меняются осознанно, с обоснованием
 в datasheet, а не «чтобы позеленело».
 """
@@ -31,7 +31,7 @@ def measure(path: str, group_key: str) -> dict:
     """Числа, по которым судим о разнообразии. Ничего не решает, только считает."""
     examples = list(iter_examples(path))
     if not examples:
-        raise DiversityError(f"{path}: ни одной строки — считать нечего")
+        raise DiversityError(f"{path}: ни одной строки - считать нечего")
 
     systems = {normalize_text(ex.messages[0].content) for ex in examples}
     groups = Counter(
@@ -60,7 +60,7 @@ def measure(path: str, group_key: str) -> dict:
 
 
 def violations(stats: dict, cfg: dict) -> list[str]:
-    """Список нарушенных порогов. Пустой список — гейт открыт.
+    """Список нарушенных порогов. Пустой список - гейт открыт.
 
     Каждая строка содержит и порог, и фактическое значение: сообщение об ошибке
     должно объяснять, что чинить, а не только что сломалось.
@@ -69,16 +69,16 @@ def violations(stats: dict, cfg: dict) -> list[str]:
 
     if stats["examples"] < cfg["min_examples"]:
         found.append(
-            f"мало примеров: {stats['examples']}, нужно ≥ {cfg['min_examples']}"
+            f"мало примеров: {stats['examples']}, нужно >= {cfg['min_examples']}"
         )
     if stats["system_prompts"] < cfg["min_system_prompts"]:
         found.append(
-            f"системных промптов {stats['system_prompts']}, нужно ≥ {cfg['min_system_prompts']} — "
+            f"системных промптов {stats['system_prompts']}, нужно >= {cfg['min_system_prompts']} - "
             f"модель заучит единственную формулировку как константу"
         )
     if stats["groups"] < cfg["min_groups"]:
         found.append(
-            f"групп {stats['groups']}, нужно ≥ {cfg['min_groups']}"
+            f"групп {stats['groups']}, нужно >= {cfg['min_groups']}"
         )
     if stats["largest_group_share"] > cfg["max_group_share"]:
         found.append(
@@ -88,7 +88,7 @@ def violations(stats: dict, cfg: dict) -> list[str]:
     ratio = stats["answer_len"]["ratio_p90_p10"]
     if ratio < cfg["min_answer_len_ratio"]:
         found.append(
-            f"разброс длин ответа p90/p10 = {ratio}, нужно ≥ {cfg['min_answer_len_ratio']} — "
+            f"разброс длин ответа p90/p10 = {ratio}, нужно >= {cfg['min_answer_len_ratio']} - "
             f"ответы одной длины выдают шаблон"
         )
     if stats["same_length_share"] > cfg["max_same_length_share"]:
@@ -126,9 +126,10 @@ def main() -> None:
     mpath.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if failed:
-        # TODO: гейт или отчёт? Стадия, которая сообщает о проблеме и продолжает,
-        # не мешает вырожденному набору доехать до обучения.
-        print("diversity: предупреждение — " + "; ".join(failed))
+        raise DiversityError(
+            "diversity: гейт не пройден:\n"
+            + "\n".join(f"  - {v}" for v in failed)
+        )
 
     print(
         f"diversity: {stats['examples']} строк, {stats['system_prompts']} системных промптов, "

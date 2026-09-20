@@ -1,0 +1,31 @@
+{
+  "version": "v1",
+  "examples": 1029,
+  "system_prompts": 5,
+  "groups": 76,
+  "largest_group": "git / troubleshooting scenario 3",
+  "largest_group_share": 0.0175,
+  "answer_len": {
+    "p10": 256,
+    "p50": 436,
+    "p90": 702,
+    "ratio_p90_p10": 2.74,
+    "cv": 0.342,
+    "min": 187,
+    "max": 759
+  },
+  "same_length_share": 0.0117,
+  "duplicate_answer_share": 0.0,
+  "thresholds": {
+    "min_examples": 1000,
+    "min_system_prompts": 3,
+    "min_groups": 50,
+    "max_group_share": 0.1,
+    "min_answer_len_ratio": 1.6,
+    "max_same_length_share": 0.25,
+    "max_duplicate_answer_share": 0.3
+  },
+  "violations": [],
+  "passed": true,
+  "seconds": 0.06
+}

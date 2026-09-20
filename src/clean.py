@@ -5,11 +5,13 @@ import time
 from pathlib import Path
 
 from src.config import load_params
-from src.dedup import exact_duplicates
+from src.dedup import exact_duplicates, near_duplicates
 from src.pii import scrub
 from src.schema import Example, dump, iter_examples
 from src.stats import percentile
 from src.textnorm import normalize_group, normalize_text
+
+
 
 
 def percentiles(values: list[int]) -> dict[str, int]:
@@ -29,7 +31,7 @@ def main() -> None:
     paths = params["paths"]
     started = time.perf_counter()
 
-    # 1. Валидация схемы. Битая строка — исключение с номером строки, стадия падает.
+    # 1. Валидация схемы. Битая строка - исключение с номером строки, стадия падает.
     examples: list[Example] = list(iter_examples(paths["raw"]))
     rows_in = len(examples)
 
@@ -46,7 +48,7 @@ def main() -> None:
             continue
         kept.append(ex)
 
-    # 3. Чистка ПДн — по всем ролям, включая ответ ассистента.
+    # 3. Чистка ПДн - по всем ролям, включая ответ ассистента.
     pii_hits: dict[str, int] = {}
     pii_rows = 0
     if cfg["pii"]["enabled"]:
@@ -67,7 +69,22 @@ def main() -> None:
     kept = [ex for i, ex in enumerate(kept) if i not in exact]
 
     # 5. TODO: сюда просится ещё один шаг дедупликации.
-    near: set[int] = set()
+    # 5. Near-duplicate дедупликация.
+    # 5. Near-duplicate дедупликация: жадный проход MinHash+LSH,
+    #    первый представитель кластера остаётся, остальные - в near.
+    nd = params["clean"]["near_dup"]
+
+    if nd["enabled"]:
+        texts = [normalize_text(ex.user) for ex in kept]
+        near = set(near_duplicates(
+            texts,
+            shingle_words=nd["shingle_words"],
+            num_perm=nd["num_perm"],
+            threshold=nd["threshold"],
+        ))
+        kept = [ex for i, ex in enumerate(kept) if i not in near]
+    else:
+        near = set()
 
     out = Path(paths["clean"])
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -94,7 +111,7 @@ def main() -> None:
     mpath.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(
-        f"clean: {rows_in} → {len(kept)} строк "
+        f"clean: {rows_in} -> {len(kept)} строк "
         f"(длина -{dropped_length}, точные -{len(exact)}, near-dup -{len(near)}), "
         f"ПДн замаскировано в {pii_rows} строках, {metrics['seconds']} с"
     )

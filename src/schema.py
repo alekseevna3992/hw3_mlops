@@ -1,4 +1,4 @@
-"""Схема примера и её валидация. Битая строка роняет стадию — это гейт, а не отчёт."""
+"""Схема примера и её валидация. Битая строка роняет стадию - это гейт, а не отчёт."""
 
 import json
 from pathlib import Path
@@ -63,7 +63,7 @@ def _explain(exc: ValidationError) -> str:
 
 
 def iter_examples(path: str | Path) -> Iterator[Example]:
-    """Прочитать JSONL с валидацией. Первая же битая строка — исключение с её номером."""
+    """Прочитать JSONL с валидацией. Первая же битая строка - исключение с её номером."""
     path = Path(path)
     with path.open(encoding="utf-8") as fh:
         for lineno, line in enumerate(fh, start=1):
@@ -72,7 +72,7 @@ def iter_examples(path: str | Path) -> Iterator[Example]:
             try:
                 payload = json.loads(line)
             except json.JSONDecodeError as exc:
-                raise SchemaError(f"{path}:{lineno}: не разбирается как JSON — {exc.msg}") from exc
+                raise SchemaError(f"{path}:{lineno}: не разбирается как JSON - {exc.msg}") from exc
             if not isinstance(payload, dict):
                 raise SchemaError(f"{path}:{lineno}: ожидался объект, получен {type(payload).__name__}")
             try:
@@ -82,5 +82,5 @@ def iter_examples(path: str | Path) -> Iterator[Example]:
 
 
 def dump(example: Example) -> str:
-    """Одна строка JSONL. ensure_ascii=False — иначе кириллица превращается в \\u04.."""
+    """Одна строка JSONL. ensure_ascii=False - иначе кириллица превращается в \\u04.."""
     return json.dumps(example.model_dump(), ensure_ascii=False)

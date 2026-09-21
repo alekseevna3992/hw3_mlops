@@ -3,7 +3,7 @@
 
 Стадия split уже проверяет себя, но проверка обязана существовать отдельно:
 сплит могли собрать руками, получить от соседа или откатить через dvc checkout.
-Возвращает 1 при любом пересечении — годится для CI.
+Возвращает 1 при любом пересечении - годится для CI.
 """
 
 import sys
@@ -14,6 +14,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.config import load_params  # noqa: E402
 from src.contamination import is_clean, report  # noqa: E402
 from src.schema import iter_examples  # noqa: E402
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
 def main() -> int:
@@ -35,7 +39,7 @@ def main() -> int:
     print(f"  пересечение по id:        {rep['id_overlap']}")
     print(f"  пересечение по тексту:    {rep['text_overlap']}")
     print(f"  пересечение по группам:   {rep['group_overlap']}")
-    print(f"  near-dup пар train↔test:  {rep['near_dup_pairs']}")
+    print(f"  near-dup пар train<->test:  {rep['near_dup_pairs']}")
 
     if is_clean(rep):
         print("контаминации нет")

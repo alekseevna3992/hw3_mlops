@@ -22,6 +22,11 @@ from src.schema import iter_examples
 from src.stats import spread
 from src.textnorm import normalize_group, normalize_text
 
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 class DiversityError(ValueError):
     """Набор прошёл все предыдущие стадии, но обучать на нём нечего."""
